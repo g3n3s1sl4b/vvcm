@@ -1,7 +1,7 @@
 #!/bin/bash
 
-REPO='https://raw.githubusercontent.com/truestaking/mccm/main'
-DEST='/opt/moonbeam/mccm'
+REPO='https://raw.githubusercontent.com/truestaking/vvcm/main'
+DEST='/opt/velas/vvcm'
 
 ################################
 #### CONVENIENCE FUNCTIONS #####
@@ -26,13 +26,14 @@ get_answer() {
     esac
   done
 }
+##############################
 
 generate_data(){
 cat << EOF
 {
-"chain": "movr",
+"chain": "vlx",
 "name": "$NAME",
-"address": "$COLLATOR_ADDRESS",
+"address": "$NODE_IDENTITY",
 "telegram_username": "$TELEGRAM_USER",
 "email_username": "$EMAIL_USER",
 "monitor": {
@@ -42,7 +43,7 @@ cat << EOF
   "nvme_lifespan": "$MONITOR_NVME_LIFESPAN",
   "nvme_selftest": "$MONITOR_NVME_SELFTEST",
   "drive_space": "$MONITOR_DRIVE_SPACE",
-  "producing_blocks": "$MONITOR_PRODUCING_BLOCKS",
+  "delinquent_status": "$MONITOR_DELINQUENT_STATUS",
   "oom_condition": "$MONITOR_OOM_CONDITION"
   }
 }
@@ -51,18 +52,18 @@ EOF
 
 write_env() {
   echo -ne "
-##### MCCM user variables #####
-### Uncomment the next line to set your own peak_load_avg value or leave it undefined to use the MCCM default
+##### VVCM user variables #####
+### Uncomment the next line to set your own peak_load_avg value or leave it undefined to use the VVCM default
 #peak_load_avg=
 
-##### END MCCM user variables #####
+##### END VVCM user variables #####
 
 #### DO NOT EDIT BELOW THIS LINE! #####
 #### TO EDIT THESE VARIABLES, RUN update_monitor.sh ####
 #### DO NOT COPY THIS FILE or edit the API KEY ####
 API_KEY=$API_KEY
 NAME='$NAME'
-MONITOR_PRODUCING_BLOCKS=$MONITOR_PRODUCING_BLOCKS
+MONITOR_DELINQUENT_STATUS=$MONITOR_DELINQUENT_STATUS
 MONITOR_PROCESS=$MONITOR_PROCESS
 MONITOR_CPU=$MONITOR_CPU
 MONITOR_OOM_CONDITION=$MONITOR_OOM_CONDITION
@@ -72,7 +73,7 @@ MONITOR_NVME_LIFESPAN=$MONITOR_NVME_LIFESPAN
 MONITOR_NVME_SELFTEST=$MONITOR_NVME_SELFTEST
 EMAIL_USER=$EMAIL_USER
 TELEGRAM_USER=$TELEGRAM_USER
-COLLATOR_ADDRESS=$COLLATOR_ADDRESS
+NODE_IDENTITY=$NODE_IDENTITY
 ACTIVE=$ACTIVE
 " | sudo dd of=$DEST/env status=none
 }
@@ -83,35 +84,36 @@ ACTIVE=$ACTIVE
 
 echo; echo
 cat << "EOF"
-  __  __                   _                             _____      _ _       _                              
- |  \/  |                 | |                           / ____|    | | |     | |                             
- | \  / | ___   ___  _ __ | |__   ___  __ _ _ __ ___   | |     ___ | | | __ _| |_ ___  _ __                  
- | |\/| |/ _ \ / _ \| '_ \| '_ \ / _ \/ _` | '_ ` _ \  | |    / _ \| | |/ _` | __/ _ \| '__|                 
- | |  | | (_) | (_) | | | | |_) |  __/ (_| | | | | | | | |___| (_) | | | (_| | || (_) | |                    
- |_|__|_|\___/ \___/|_| |_|_.__/ \___|\__,_|_|_|_| |_|  \_____\___/|_|_|\__,_|\__\___/|_|      _             
-  / ____|                                    (_) |         |  \/  |           (_) |           (_)            
- | |     ___  _ __ ___  _ __ ___  _   _ _ __  _| |_ _   _  | \  / | ___  _ __  _| |_ ___  _ __ _ _ __   __ _ 
- | |    / _ \| '_ ` _ \| '_ ` _ \| | | | '_ \| | __| | | | | |\/| |/ _ \| '_ \| | __/ _ \| '__| | '_ \ / _` |
- | |___| (_) | | | | | | | | | | | |_| | | | | | |_| |_| | | |  | | (_) | | | | | || (_) | |  | | | | | (_| |
-  \_____\___/|_| |_| |_|_| |_| |_|\__,_|_| |_|_|\__|\__, | |_|  |_|\___/|_| |_|_|\__\___/|_|  |_|_| |_|\__, |
-                                                     __/ |                                              __/ |
-                                                    |___/                                              |___/  
+HERE
+
+                                                                                                                                                                                           
+,--.   ,--.     ,--.                    ,-----.                                           ,--.  ,--.               ,--.   ,--.               ,--.  ,--.                ,--.                
+ \  `.'  /,---. |  | ,--,--. ,---.     '  .--./ ,---. ,--,--,--.,--,--,--.,--.,--.,--,--, `--',-'  '-.,--. ,--.    |   `.'   | ,---. ,--,--, `--',-'  '-. ,---. ,--.--.`--',--,--,  ,---.  
+  \     /| .-. :|  |' ,-.  |(  .-'     |  |    | .-. ||        ||        ||  ||  ||      \,--.'-.  .-' \  '  /     |  |'.'|  || .-. ||      \,--.'-.  .-'| .-. ||  .--',--.|      \| .-. | 
+   \   / \   --.|  |\ '-'  |.-'  `)    '  '--'\' '-' '|  |  |  ||  |  |  |'  ''  '|  ||  ||  |  |  |    \   '      |  |   |  |' '-' '|  ||  ||  |  |  |  ' '-' '|  |   |  ||  ||  |' '-' ' 
+    `-'   `----'`--' `--`--'`----'      `-----' `---' `--`--`--'`--`--`--' `----' `--''--'`--'  `--'  .-'  /       `--'   `--' `---' `--''--'`--'  `--'   `---' `--'   `--'`--''--'.`-  /  
+,--.               ,--------.                           ,---.   ,--.          ,--.    ,--.            `---'                                                                        `---'   
+|  |-.,--. ,--.    '--.  .--',--.--.,--.,--. ,---.     '   .-',-'  '-. ,--,--.|  |,-. `--',--,--,  ,---.                                                                                   
+| .-. '\  '  /        |  |   |  .--'|  ||  || .-. :    `.  `-.'-.  .-'' ,-.  ||     / ,--.|      \| .-. |                                                                                  
+| `-' | \   '         |  |   |  |   '  ''  '\   --.    .-'    | |  |  \ '-'  ||  \  \ |  ||  ||  |' '-' '                                                                                  
+ `---'.-'  /          `--'   `--'    `----'  `----'    `-----'  `--'   `--`--'`--'`--'`--'`--''--'.`-  /                                                                                   
+      `---'                                                                                       `---'                                                                                    
+
+
 EOF
 echo; echo;
 cat << "EOF"
 
 
- 
-
-Moonbeam Collator Community Monitoring
+Velas Validator Community Monitoring
 
 Basic -> just the stuff you need near time alerting on
 
 Simple -> just standard Linux command line tools
 
 Essential -> everything you need, nothing more
-    - block production warning
-    - collator service status
+    - node delinquent warning
+    - validator service status
     - out of memory error condition
     - loss of network connectivity
     - disk space
@@ -122,12 +124,12 @@ Free -> backend alerting contributed by True Staking
 
 You will need:
     1.  your telegram user name or email address
-    2.  your collator public address (if you wish to monitor block production)
+    2.  your validator public address (if you wish to be alerted when you node enters 'delinquent' status)
 
 EOF
 echo;echo
 
-if ! get_answer "Do you wish to install and configure MCCM?"; then exit; fi
+if ! get_answer "Do you wish to install and configure VVCM?"; then exit; fi
 echo; echo
 
 
@@ -140,7 +142,7 @@ ACTIVE=true
 
 #### get name, default is hostname ###
 NAME=$(hostname)
-if get_answer "The default name is $NAME do you want to set a different name for this server account? "
+if get_answer "The hostname is $NAME - do you want to use a different name for this server account? "
 then
   echo
   NAME=$(get_input "Please enter the name for this service account")
@@ -148,22 +150,29 @@ else echo
 fi
 echo
 
-#### is the collator producing blocks? ####
-COLLATOR_ADDRESS=''
-if get_answer "Do you want to be alerted if your node has failed to produce a block in the normal time window? "
-    then MONITOR_PRODUCING_BLOCKS=true
+#### is the validator delinquent? ####
+NODE_IDENTITY=''
+if get_answer "Do you want to be alerted if your node is delinquent? "
+    then MONITOR_DELINQUENT_STATUS=true
     echo
-    COLLATOR_ADDRESS=$(get_input "Please enter your node public address. Paste and press <ENTER> ")
-    else MONITOR_PRODUCING_BLOCKS=false
+	a=$(curl --connect-timeout 1 http://localhost:18899 -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1, "method":"getIdentity"}' | cut -f 4 -d ":" | cut -f 1 -d "}" | sed 's/\"//g')
+	if [[ $a =~ [a-z] ]]
+	then NODE_IDENITY=$a
+	else 
+		echo "failed to obtain NODE_IDENTITY via RPC to localhost"
+		echo;echo
+	fi
+    NODE_IDENTITY=$(get_input "Please enter your node identity (can be found on your profile page on velasvalidators.com). Paste and press <ENTER> ")
+    else MONITOR_DELINQUENT_STATUS=false
     echo
 fi
 echo
 
-#### is the collator process still running? ####
-if get_answer "Do you want to be alerted if your collator service stops running?"
+#### is the validator process still running? ####
+if get_answer "Do you want to be alerted if your validator service stops running?"
     then 
 	echo
-        service=$(get_input "Please enter the service name you want to monitor? This is usually moonriver or moonbeam")
+        service=$(get_input "Please enter the service name you want to monitor? This is usually 'velas' ")
         if (sudo systemctl -q is-active $service)
             then MONITOR_PROCESS=$service
             else
@@ -233,7 +242,7 @@ if echo $MONITOR_NVME_HEAT,$MONITOR_NVME_LIFESPAN,$MONITOR_NVME_SELFTEST | grep 
                 echo "installing nvme-cli.."
                 if ! sudo apt install nvme-cli
                 then echo;
-                    echo "MCCM setup failed to install nvme-cli. Please manually install nvme-cli and rerun setup."
+                    echo "VVCM setup failed to install nvme-cli. Please manually install nvme-cli and rerun setup."
                 echo; echo
                 fi
         fi
@@ -242,7 +251,7 @@ if echo $MONITOR_NVME_HEAT,$MONITOR_NVME_LIFESPAN,$MONITOR_NVME_SELFTEST | grep 
                 echo "installing smartmontools..."
                 if ! sudo apt install smartmontools
                 then echo
-                    echo "MCCM setup failed to install smartmontools. Please manually install nvme-cli and rerun setup."
+                    echo "VVCM setup failed to install smartmontools. Please manually install nvme-cli and rerun setup."
                     echo; echo
                 fi
         fi
@@ -250,7 +259,7 @@ if echo $MONITOR_NVME_HEAT,$MONITOR_NVME_LIFESPAN,$MONITOR_NVME_SELFTEST | grep 
 fi
 
 #### alert via email? ####
-if get_answer "Do you want to receive collator alerts via email?" 
+if get_answer "Do you want to receive validator alerts via email?" 
     then echo;
     EMAIL_USER=$(get_input "Please enter an email address for receiving alerts ")
     else EMAIL_USER=''
@@ -259,12 +268,12 @@ echo
 
 #### alert via TG ####
 TELEGRAM_USER="";
-if get_answer "Do you want to receive collator alerts via Telegram?"
+if get_answer "Do you want to receive validator alerts via Telegram?"
     then echo;
     TELEGRAM_USER=$(get_input "Please enter your telegram username ")
-    echo "IMPORTANT: Please enter a telegram chat with our bot and message 'hi!' LINK: https://t.me/moonbeamccm_bot"
-    echo "IMPORTANT: Even if you have messaged our bot before, you must message him again"
-    read -p "After you say "hi" to the mccm bot press <enter>."; echo
+    echo "IMPORTANT: Please enter a telegram chat with our bot and message 'hi!' LINK: http://t.me/velasvvcm_bot"
+    echo "IMPORTANT: Even if you have messaged our bot before, you must message her again"
+    read -p "After you say "hi" to the truestaking bot, return here and  press <enter>."; echo
     else TELEGRAM_USER=''
 fi
 if ( echo $TELEGRAM_USER | grep -qi [A-Za-z0-9] ) 
@@ -274,8 +283,8 @@ fi
 #### check that there is at least one valid alerting mechanism ####
 if ! ( [[ $EMAIL_USER =~ [\@] ]] || [[ $TELEGRAM_USER =~ [a-zA-Z0-9] ]] )
 then
-  logger "MCCM requires either email or telegram for alerting, bailing out of setup."  
-  echo "MCCM requires either email or telegram for alerting. Rerun setup to provide email or telegram alerting.Bailing out."
+  logger "VVCM requires either email or telegram for alerting, bailing out of setup."
+  echo "VVCM requires either email or telegram for alerting. Rerun setup to provide email or telegram alerting.Bailing out."
   exit
 fi
 
@@ -287,7 +296,7 @@ fi
 API="$('/usr/bin/curl' -s -X POST -H 'Content-Type: application/json' -d "$(generate_data)" https://monitor.truestaking.com/register)"
 if ! [[ $API =~ "OK" ]]
 then
-  logger "MCCM failed to obtain API KEY"
+  logger "VVCM failed to obtain API KEY"
 	echo
   echo $API
   echo
@@ -300,15 +309,15 @@ sudo mkdir -p $DEST 2>&1 >/dev/null
 write_env
 
 echo
-echo "installing mccm.service"
-## curl mccm.service
-sudo curl $REPO/mccm.service -O 
-sudo mv ./mccm.service /etc/systemd/system/mccm.service
-sudo systemctl enable mccm.service
-echo "installing mccm.timer"
-## curl mccm.timer
-sudo curl $REPO/mccm.timer -O
-sudo mv ./mccm.timer /etc/systemd/system/mccm.timer
+echo "installing vvcm.service"
+## curl vvcm.service
+sudo curl $REPO/vvcm.service -O
+sudo mv ./vvcm.service /etc/systemd/system/vvcm.service
+sudo systemctl enable vvcm.service
+echo "installing vvcm.timer"
+## curl vvcm.timer
+sudo curl $REPO/vvcm.timer -O
+sudo mv ./vvcm.timer /etc/systemd/system/vvcm.timer
 ## curl monitor.sh
 sudo curl $REPO/monitor.sh -O
 sudo mv ./monitor.sh $DEST/
@@ -322,16 +331,16 @@ sudo curl $REPO/update_monitor.sh -O
 sudo mv ./update_monitor.sh $DEST/
 sudo chmod +x $DEST/update_monitor.sh
 echo
-echo "Starting mccm service"
-sudo systemctl enable mccm.timer
-sudo systemctl start mccm.timer
+echo "Starting vvcm service"
+sudo systemctl enable vvcm.timer
+sudo systemctl start vvcm.timer
 echo
 echo "You can update your preferences or stop monitoring and alerts at anytime by running update_monitor.sh"
 echo ; echo
 echo "you will get a summary of your configuration and registration shortly via email or TG."
 echo; echo
 echo "##########################################"
-echo "In MCCM, every server has a unique API key."
+echo "In VVCM, every server has a unique API key."
 echo "Here is the API key for this server: $API_KEY"
 echo "You can also find it in $DEST/env"
 echo "WARNING: you need this key to update or remove this account, so please store it safely!"

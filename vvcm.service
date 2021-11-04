@@ -1,0 +1,10 @@
+[Unit]
+Description="Velas Validator Community Monitor"
+Wants=vvcm.timer
+
+[Service]
+Type=oneshot
+ExecStart=/opt/velas/vvcm/monitor.sh
+
+[Install]
+WantedBy=multi-user.target

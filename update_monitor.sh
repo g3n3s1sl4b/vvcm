@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DEST='/opt/moonbeam/mccm'
+DEST='/opt/velas/vvcm'
 cd $DEST
 
 ################################
@@ -31,9 +31,9 @@ get_answer() {
 generate_data(){
 cat << EOF
 {
-"chain": "movr",
+"chain": "vlx",
 "name": "$NAME",
-"address": "$COLLATOR_ADDRESS",
+"address": "$NODE_IDENTITY",
 "telegram_username": "$TELEGRAM_USER",
 "email_username": "$EMAIL_USER",
 "monitor": {
@@ -43,7 +43,7 @@ cat << EOF
   "nvme_lifespan": "$MONITOR_NVME_LIFESPAN",
   "nvme_selftest": "$MONITOR_NVME_SELFTEST",
   "drive_space": "$MONITOR_DRIVE_SPACE",
-  "producing_blocks": "$MONITOR_PRODUCING_BLOCKS",
+  "delinquent_status": "$MONITOR_DELINQUENT_STATUS",
   "oom_condition": "$MONITOR_OOM_CONDITION"
   }
 }
@@ -52,18 +52,18 @@ EOF
 
 write_env() {
   echo -ne "
-##### MCCM user variables #####
-### Uncomment the next line to set your own peak_load_avg value or leave it undefined to use the MCCM default
+##### VVCM user variables #####
+### Uncomment the next line to set your own peak_load_avg value or leave it undefined to use the VVCM default
 #peak_load_avg=
 
-##### END MCCM user variables #####
+##### END VVCM user variables #####
 
 #### DO NOT EDIT BELOW THIS LINE! #####
 #### TO EDIT THESE VARIABLES, RUN update_monitor.sh ####
 #### DO NOT COPY THIS FILE or edit the API KEY ####
 API_KEY=$API_KEY
 NAME='$NAME'
-MONITOR_PRODUCING_BLOCKS=$MONITOR_PRODUCING_BLOCKS
+MONITOR_DELINQUENT_STATUS=$MONITOR_DELINQUENT_STATUS
 MONITOR_PROCESS=$MONITOR_PROCESS
 MONITOR_CPU=$MONITOR_CPU
 MONITOR_OOM_CONDITION=$MONITOR_OOM_CONDITION
@@ -73,7 +73,7 @@ MONITOR_NVME_LIFESPAN=$MONITOR_NVME_LIFESPAN
 MONITOR_NVME_SELFTEST=$MONITOR_NVME_SELFTEST
 EMAIL_USER=$EMAIL_USER
 TELEGRAM_USER=$TELEGRAM_USER
-COLLATOR_ADDRESS=$COLLATOR_ADDRESS
+NODE_IDENTITY=$NODE_IDENTITY
 ACTIVE=$ACTIVE
 " | sudo dd of=$DEST/env status=none
 }
@@ -85,32 +85,34 @@ ACTIVE=$ACTIVE
 echo; echo
 
 cat << "EOF"
-  __  __                   _                             _____      _ _       _                              
- |  \/  |                 | |                           / ____|    | | |     | |                             
- | \  / | ___   ___  _ __ | |__   ___  __ _ _ __ ___   | |     ___ | | | __ _| |_ ___  _ __                  
- | |\/| |/ _ \ / _ \| '_ \| '_ \ / _ \/ _` | '_ ` _ \  | |    / _ \| | |/ _` | __/ _ \| '__|                 
- | |  | | (_) | (_) | | | | |_) |  __/ (_| | | | | | | | |___| (_) | | | (_| | || (_) | |                    
- |_|__|_|\___/ \___/|_| |_|_.__/ \___|\__,_|_|_|_| |_|  \_____\___/|_|_|\__,_|\__\___/|_|      _             
-  / ____|                                    (_) |         |  \/  |           (_) |           (_)            
- | |     ___  _ __ ___  _ __ ___  _   _ _ __  _| |_ _   _  | \  / | ___  _ __  _| |_ ___  _ __ _ _ __   __ _ 
- | |    / _ \| '_ ` _ \| '_ ` _ \| | | | '_ \| | __| | | | | |\/| |/ _ \| '_ \| | __/ _ \| '__| | '_ \ / _` |
- | |___| (_) | | | | | | | | | | | |_| | | | | | |_| |_| | | |  | | (_) | | | | | || (_) | |  | | | | | (_| |
-  \_____\___/|_| |_| |_|_| |_| |_|\__,_|_| |_|_|\__|\__, | |_|  |_|\___/|_| |_|_|\__\___/|_|  |_|_| |_|\__, |
-                                                     __/ |                                              __/ |
-                                                    |___/                                              |___/ 
+
+                                                                                                                                                                                           
+,--.   ,--.     ,--.                    ,-----.                                           ,--.  ,--.               ,--.   ,--.               ,--.  ,--.                ,--.                
+ \  `.'  /,---. |  | ,--,--. ,---.     '  .--./ ,---. ,--,--,--.,--,--,--.,--.,--.,--,--, `--',-'  '-.,--. ,--.    |   `.'   | ,---. ,--,--, `--',-'  '-. ,---. ,--.--.`--',--,--,  ,---.  
+  \     /| .-. :|  |' ,-.  |(  .-'     |  |    | .-. ||        ||        ||  ||  ||      \,--.'-.  .-' \  '  /     |  |'.'|  || .-. ||      \,--.'-.  .-'| .-. ||  .--',--.|      \| .-. | 
+   \   / \   --.|  |\ '-'  |.-'  `)    '  '--'\' '-' '|  |  |  ||  |  |  |'  ''  '|  ||  ||  |  |  |    \   '      |  |   |  |' '-' '|  ||  ||  |  |  |  ' '-' '|  |   |  ||  ||  |' '-' ' 
+    `-'   `----'`--' `--`--'`----'      `-----' `---' `--`--`--'`--`--`--' `----' `--''--'`--'  `--'  .-'  /       `--'   `--' `---' `--''--'`--'  `--'   `---' `--'   `--'`--''--'.`-  /  
+,--.               ,--------.                           ,---.   ,--.          ,--.    ,--.            `---'                                                                        `---'   
+|  |-.,--. ,--.    '--.  .--',--.--.,--.,--. ,---.     '   .-',-'  '-. ,--,--.|  |,-. `--',--,--,  ,---.                                                                                   
+| .-. '\  '  /        |  |   |  .--'|  ||  || .-. :    `.  `-.'-.  .-'' ,-.  ||     / ,--.|      \| .-. |                                                                                  
+| `-' | \   '         |  |   |  |   '  ''  '\   --.    .-'    | |  |  \ '-'  ||  \  \ |  ||  ||  |' '-' '                                                                                  
+ `---'.-'  /          `--'   `--'    `----'  `----'    `-----'  `--'   `--`--'`--'`--'`--'`--''--'.`-  /                                                                                   
+      `---'                                                                                       `---'                                                                                    
+
+
 EOF
 echo; echo;
 
 if [ ! -f $DEST/env ]
 then
-    echo "Cannot find MCCM config file, please install MCCM"
+    echo "Cannot find VVCM config file, please install VVCM"
     exit; exit
 fi
 
 source $DEST/env
 
-#### Make sure server and local monitoring status is sycned ###
-if sudo systemctl is-active mccm.timer | grep -qi ^active
+#### Make sure server and local monitoring status is synced ###
+if sudo systemctl is-active vvcm.timer | grep -qi ^active
 then
   TIMER_ACTIVE=true
 else
@@ -121,12 +123,12 @@ then
   echo "#####################"
   if [[ $TIMER_ACTIVE =~ "true" ]]
   then
-    echo "WARNING: mccm.timer is active but monitoring is paused on our server"
+    echo "WARNING: vvcm.timer is active but monitoring is paused on our server"
     echo "If you want to resume monitoring, continue and enter y on the next prompt"
-    echo "If you want to disable monitoring completely, run sudo systemctl stop mccm.timer"
+    echo "If you want to disable monitoring completely, run sudo systemctl stop vvcm.timer"
   else
-    echo "WARNING: mccm.timer is inactive but monitoring is active on our server"
-    echo "If you want to resume monitoring, run sudo systemctl start mccm.timer"
+    echo "WARNING: vvcm.timer is inactive but monitoring is active on our server"
+    echo "If you want to resume monitoring, run sudo systemctl start vvcm.timer"
     echo "If you want to disable monitoring completely, continue and enter y on the next prompt"
   fi
   echo "#####################"
@@ -144,9 +146,9 @@ then
       then
       ACTIVE=false
       echo "Alerts from our server have been paused"
-        if sudo systemctl stop mccm.timer
-          then echo "mccm.timer has been paused"
-          else echo "failed to stop mccm.timer. Possibly it is not installed, or it was already stopped/disabled." 
+        if sudo systemctl stop vvcm.timer
+          then echo "vvcm.timer has been paused"
+          else echo "failed to stop vvcm.timer. Possibly it is not installed, or it was already stopped/disabled." 
         fi
     else
       echo "Server side error: $RESP"
@@ -162,7 +164,7 @@ else
     if [[ $RESP =~ "OK" ]]
       then
       ACTIVE=true
-      sudo systemctl start mccm.timer
+      sudo systemctl start vvcm.timer
       echo "Monitoring has been resumed"
     else
       echo "Server side error: $RESP"
@@ -182,8 +184,6 @@ echo; echo
 
 #### Set active to be true by default in the setup.sh ####
 ACTIVE=true
-
-#### get name, default is hostname ###
 if get_answer "The current name is $NAME do you want to set a different name for this server account? "
 then
   echo
@@ -192,21 +192,28 @@ else echo
 fi
 echo
 
-#### is the collator producing blocks? ####
-if get_answer "Do you want to be alerted if your node has failed to produce a block in the normal time window? "
-    then MONITOR_PRODUCING_BLOCKS=true
+#### is the validator is delinquent? ####
+if get_answer "Do you want to be alerted if your node is delinquent? "
+    then MONITOR_DELINQUENT_STATUS=true
     echo
-    COLLATOR_ADDRESS=$(get_input_default "Please enter your node public address. Paste and press <ENTER> " $COLLATOR_ADDRESS)
-    else MONITOR_PRODUCING_BLOCKS=false
+        a=$(curl --connect-timeout 1 http://localhost:18899 -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1, "method":"getIdentity"}' | cut -f 4 -d ":" | cut -f 1 -d "}" | sed 's/\"//g')
+        if [[ $a =~ [a-z] ]]
+        then NODE_IDENITY=$a
+        else
+                echo "failed to obtain NODE_IDENTITY via RPC to localhost"
+                echo;echo
+        fi
+    NODE_IDENTITY=$(get_input "Please enter your node identity (can be found on your profile page on velasvalidators.com). Paste and press <ENTER> ")
+    else MONITOR_DELINQUENT_STATUS=false
     echo
 fi
 echo
 
-#### is the collator process still running? ####
-if get_answer "Do you want to be alerted if your collator service stops running?"
+#### is the validator process still running? ####
+if get_answer "Do you want to be alerted if your validator service stops running?"
     then 
 	echo
-        service=$(get_input_default "Please enter the service name you want to monitor? This is usually moonriver or moonbeam" $MONITOR_PROCESS)
+        service=$(get_input_default "Please enter the service name you want to monitor? This is usually 'velas' " $MONITOR_PROCESS)
         if (sudo systemctl -q is-active $service)
             then MONITOR_PROCESS=$service
             else
@@ -276,7 +283,7 @@ if echo $MONITOR_NVME_HEAT,$MONITOR_NVME_LIFESPAN,$MONITOR_NVME_SELFTEST | grep 
                 echo "installing nvme-cli.."
                 if ! sudo apt install nvme-cli
                 then echo;
-                    echo "MCCM setup failed to install nvme-cli. Please manually install nvme-cli and rerun setup."
+                    echo "VVCM setup failed to install nvme-cli. Please manually install nvme-cli and rerun setup."
                 echo; echo
                 fi
         fi
@@ -285,7 +292,7 @@ if echo $MONITOR_NVME_HEAT,$MONITOR_NVME_LIFESPAN,$MONITOR_NVME_SELFTEST | grep 
                 echo "installing smartmontools..."
                 if ! sudo apt install smartmontools
                 then echo
-                    echo "MCCM setup failed to install smartmontools. Please manually install nvme-cli and rerun setup."
+                    echo "VVCM setup failed to install smartmontools. Please manually install nvme-cli and rerun setup."
                     echo; echo
                 fi
         fi
@@ -293,7 +300,7 @@ if echo $MONITOR_NVME_HEAT,$MONITOR_NVME_LIFESPAN,$MONITOR_NVME_SELFTEST | grep 
 fi
 
 #### alert via email? ####
-if get_answer "Do you want to receive collator alerts via email?" 
+if get_answer "Do you want to receive validator alerts via email?" 
     then echo;
     EMAIL_USER=$(get_input_default "Please enter an email address for receiving alerts " $EMAIL_USER)
     else EMAIL_USER=''
@@ -301,23 +308,23 @@ fi
 echo
 
 #### alert via TG ####
-if get_answer "Do you want to receive collator alerts via Telegram?"
+if get_answer "Do you want to receive validator alerts via Telegram?"
     then echo;
     TELEGRAM_USER=$(get_input_default "Please enter your telegram username " $TELEGRAM_USER)
-    echo "IMPORTANT: Please enter a telegram chat with our bot and message 'hi!' LINK: https://t.me/moonbeamccm_bot"
+    echo "IMPORTANT: Please enter a telegram chat with our bot and message 'hi!' LINK: https://t.me/velasvvcm_bot"
     echo "IMPORTANT: Even if you have messaged our bot before, you must message him again"
-    read -p "After you say "hi" to the mccm bot press <enter>."; echo
+    read -p "After you say "hi" to the vvcm bot press <enter>."; echo
     else TELEGRAM_USER=''
 fi
-if ( echo $TELEGRAM_USER | grep -qi [A-Za-z0-9] ) 
+if ( echo $TELEGRAM_USER | grep -qi [A-Za-z0-9] )
     then echo -n "Please do not exit the chat with our telegram bot. If you do, you will not be able to receive alerts about your system. If you leave the chat please run update_monitor.sh"; echo ;
 fi
 
 #### check that there is at least one valid alerting mechanism ####
 if ! ( [[ $EMAIL_USER =~ [\@] ]] || [[ $TELEGRAM_USER =~ [a-zA-Z0-9] ]] )
 then
-  logger "MCCM requires either email or telegram for alerting, bailing out of setup."  
-  echo "MCCM requires either email or telegram for alerting. Rerun setup to provide email or telegram alerting.Bailing out."
+  logger "VVCM requires either email or telegram for alerting, bailing out of setup."
+  echo "VVCM requires either email or telegram for alerting. Rerun setup to provide email or telegram alerting. Bailing out."
   exit
 fi
 

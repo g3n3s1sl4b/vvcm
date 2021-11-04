@@ -1,10 +1,10 @@
 #!/bin/bash
-cd /opt/moonbeam/mccm
+cd /opt/velas/vvcm
 FILE=./env
 
 if ! test -f "$FILE"
 then
-    logger "MCCM cannot find $FILE -- does not exist"
+    logger "VVCM cannot find $FILE -- does not exist"
     exit;
 fi
 source ./env
@@ -38,7 +38,7 @@ EOF
 send_data() {
     sent=$('/usr/bin/curl' -s -X POST -H 'Content-Type: application/json' -H 'Authorization: Bearer '$API_KEY'' -d "$(generate_data)"  https://monitor.truestaking.com/alert) 
     if ! [[ $sent =~ "OK" ]]
-    then logger "MCCM failed to send alert message to monitor.truestaking.com: $sent"
+    then logger "VVCM failed to send alert message to monitor.truestaking.com: $sent"
     fi
 }
 
@@ -47,17 +47,17 @@ send_data() {
 #################################
 
 #### send is_alive message ####
-logger "MCCM sending is alive message"
+logger "VVCM sending is alive message"
 sent=$('/usr/bin/curl' -s -X POST -H 'Content-Type: application/json' -H 'Authorization: Bearer '$API_KEY'' -d '{}' https://monitor.truestaking.com/is_alive) 
 if ! [[ $sent =~ "OK" ]]
-then logger "MCCM failed to send heartbeat message to monitor.truestaking.com: $sent"
+then logger "VVCM failed to send heartbeat message to monitor.truestaking.com: $sent"
 fi
 
 #### check process ####
 if ! [[ $MONITOR_PROCESS =~ "false" ]]
 then
     alert_type=process
-    logger "MCCM service status checked"
+    logger "VVCM service status checked"
     if ( ! systemctl is-active $MONITOR_PROCESS >/dev/null 2>&1 )
     then 
         alert_message="$MONITOR_PROCESS is dead"
@@ -81,13 +81,13 @@ fi
 if [[ $MONITOR_CPU =~ "true" ]]
 then
     alert_type=cpu
-    logger "MCCM checking load average" 
+    logger "VVCM checking load average" 
     load_check=$(echo "$cpu_load_avg > $peak_load_avg" | bc)
     if (( $load_check > 0 )) 
     then
         alert_message="CPU load avg is $cpu_load_avg"
         send_data
-        logger "MCCM warning CPU load is $cpu_load_avg"
+        logger "VVCM warning CPU load is $cpu_load_avg"
         
    fi
 fi
@@ -96,7 +96,7 @@ fi
 if [[ $MONITOR_NVME_HEAT =~ "true" ]]
 then
     alert_type=nvme_heat
-    logger "MCCM NVME temperature checked"
+    logger "VVCM NVME temperature checked"
     for i in `nvme list | grep dev | cut -f 1 -d " "`
     do
         high_temp_time=$(smartctl -a $i | grep "Warning  Comp. Temperature Time:" | cut -f 2 -d ":" | sed 's/[ \t]*//' | cut -f 1 -d "%" | cut -f 1 -d ".")
@@ -104,7 +104,7 @@ then
 	then
             alert_message="NVME heat alert $i"
             send_data 
-            logger "MCCM NVME heat warning - use smartctl -a $i and view the Comp. Temperature Time"
+            logger "VVCM NVME heat warning - use smartctl -a $i and view the Comp. Temperature Time"
         fi
 
     done
@@ -114,7 +114,7 @@ fi
 if [[ $MONITOR_NVME_LIFESPAN =~ "true" ]]
 then
     alert_type=nvme_lifespan
-    logger "MCCM NVME lifespan checked"
+    logger "VVCM NVME lifespan checked"
     for i in `nvme list | grep dev | cut -f 1 -d " "`
     do
         used=$(smartctl -a $i | grep percentage_used | cut -f 2 -d ":" | sed 's/[ \t]*//' | cut -f 1 -d "%" | cut -f 1 -d ".")
@@ -122,7 +122,7 @@ then
         then
            alert_message="NVME lifespan warning $i"
            send_data
-           logger "MCCM NVME warning - use smartctl -a $i to view remaining lifespan"
+           logger "VVCM NVME warning - use smartctl -a $i to view remaining lifespan"
         fi
     done
 fi
@@ -131,14 +131,14 @@ fi
 if [[ $MONITOR_NVME_SELFTEST =~ "true" ]]
 then
     alert_type=nvme_selftest
-    logger "MCCM NVME self test checked"
+    logger "VVCM NVME self test checked"
     for i in `nvme list | grep dev | cut -f 1 -d " "`
     do
         if ( ! smartctl -a $i | grep self-assessment | grep -q PASSED )
         then
             alert_message="NVME selftest failure $i"
             send_data
-            logger "MCCM NVME warning - use smartctl -a $i to view selftest status"
+            logger "VVCM NVME warning - use smartctl -a $i to view selftest status"
         fi
     done
 fi
@@ -147,14 +147,14 @@ fi
 if [[ $MONITOR_DRIVE_SPACE =~ "true" ]]
 then
     alert_type=drive_space
-    logger "MCCM disk space checked"
+    logger "VVCM disk space checked"
     ALERT=90
     used=$(df --output=pcent,target | grep -v snap | grep -v Mounted | sed "s/[ \t]*//" | cut -f 1 -d "%" | sort -n | tail -n 1)
     if(( $used >= $ALERT ))
     then 
         alert_message="drive space warning"
         send_data
-        logger "MCCM disk space warning - use df -h to see available disk space"
+        logger "VVCM disk space warning - use df -h to see available disk space"
     fi
 fi
 

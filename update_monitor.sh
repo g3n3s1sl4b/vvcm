@@ -201,9 +201,9 @@ if get_answer "Do you want to be alerted if your node is delinquent? "
         else
                 echo "failed to obtain NODE_IDENTITY via RPC to localhost"
                 echo;echo
-        fi
-    NODE_IDENTITY=$(get_input "Please enter your node identity (can be found on your profile page on velasvalidators.com). Paste and press <ENTER> ")
-    else MONITOR_DELINQUENT_STATUS=false
+    		NODE_IDENTITY=$(get_input "Please enter your node identity (can be found on your profile page on velasvalidators.com). Paste and press <ENTER> ")
+    	fi
+	else MONITOR_DELINQUENT_STATUS=false
     echo
 fi
 echo

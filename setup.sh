@@ -155,15 +155,17 @@ NODE_IDENTITY=''
 if get_answer "Do you want to be alerted if your node is delinquent? "
     then MONITOR_DELINQUENT_STATUS=true
     echo
+	echo "checking local identity"
+	echo
 	a=$(curl --connect-timeout 1 http://localhost:8899 -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1, "method":"getIdentity"}' | cut -f 4 -d ":" | cut -f 1 -d "}" | sed 's/\"//g')
 	if [[ $a =~ [a-z] ]]
 	then NODE_IDENITY=$a
 	else 
 		echo "failed to obtain NODE_IDENTITY via RPC to localhost"
 		echo;echo
-	fi
-    NODE_IDENTITY=$(get_input "Please enter your node identity (can be found on your profile page on velasvalidators.com). Paste and press <ENTER> ")
-    else MONITOR_DELINQUENT_STATUS=false
+		NODE_IDENTITY=$(get_input "Please enter your node identity (can be found on your profile page on velasvalidators.com). Paste and press <ENTER> ")
+    	fi
+	else MONITOR_DELINQUENT_STATUS=false
     echo
 fi
 echo

@@ -270,9 +270,9 @@ TELEGRAM_USER="";
 if get_answer "Do you want to receive validator alerts via Telegram?"
     then echo;
     TELEGRAM_USER=$(get_input "Please enter your telegram username ")
-    echo "IMPORTANT: Please enter a telegram chat with our bot and message 'hi!' LINK: http://t.me/velasvvcm_bot"
-    echo "IMPORTANT: Even if you have messaged our bot before, you must message her again"
-    read -p "After you say "hi" to the truestaking bot, return here and  press <enter>."; echo
+    echo "IMPORTANT: Please enter a telegram chat with our bot LINK: https://t.me/velasvvcm_bot"
+    echo "IMPORTANT: If you are already in a telegram chat with our bot you do not have to create a new one. Press <enter>"
+    read -p "After you join a chat with our bot, return here and press <enter>."; echo
     else TELEGRAM_USER=''
 fi
 if ( echo $TELEGRAM_USER | grep -qi [A-Za-z0-9] ) 
